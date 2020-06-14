@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    var itemArray = ["Find Mikey", "Buy Eggos", "Destroy the Demigorgon"]
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard
 
@@ -18,8 +18,12 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        let newItem = Item()
+        newItem.title = "Find Mikey"
+        itemArray.append(newItem)
+        
         //If there is an array with the name "TodoListArray" in our user defaults, set the itemArray equal to it
-        if let items = defaults.array(forKey: "TodoListArray") as? [String]{
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item]{
             itemArray = items
         }
     }
@@ -35,8 +39,25 @@ class TodoListViewController: UITableViewController {
         //Make sure we reuse cells as we scroll
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
+        
+        let item = itemArray[indexPath.row]
         //set the text of the cell equal to the Index path row number equivalent to our item array
-        cell.textLabel?.text = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        
+        
+        //Ternary operator
+        //value = condition ? valueifTrue : valueifFalse
+
+        
+        //set the checkmark on if status of the object is "done" using ternary operator
+        cell.accessoryType = item.done == true ? .checkmark : .none
+        
+//
+//        if item.done == true{
+//            cell.accessoryType = .checkmark
+//        } else {
+//            cell.accessoryType = .none
+//        }
         
         //return the cell
         return cell
@@ -49,15 +70,15 @@ class TodoListViewController: UITableViewController {
         //Print the name of the row we selected
         //print(itemArray[indexPath.row])
         
+        //if our item.done is true, make it false and vice versa
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        //Reload the table to see the status update
+        tableView.reloadData()
+        
         //deselect the cell after it has been tapped so it doesn't remaoin highlighted. And animate the resule
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{
-            //Grab the cell we selected and change its accessory type to checkmark
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
     }
     
     //MARK: Add Items to our list
@@ -72,7 +93,9 @@ class TodoListViewController: UITableViewController {
         //Creation an option/action for the above alert window
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //What will happen once the user clicks Add Item on the UI Alert
-            self.itemArray.append(textField.text!)
+            let newItem = Item()
+            newItem.title = textField.text!
+            self.itemArray.append(newItem)
             self.defaults.set(self.itemArray, forKey: "TodoListArray")
             //Once we append the new item to our array, we need to reload the entire table view to update the UI
             self.tableView.reloadData()
