@@ -11,21 +11,18 @@ import UIKit
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
+            
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
-    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        let newItem = Item()
-        newItem.title = "Find Mikey"
-        itemArray.append(newItem)
         
         //If there is an array with the name "TodoListArray" in our user defaults, set the itemArray equal to it
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item]{
-            itemArray = items
-        }
+        loadItems()
     }
     
     //MARK: - TableView Data Source Methods
@@ -51,6 +48,7 @@ class TodoListViewController: UITableViewController {
         
         //set the checkmark on if status of the object is "done" using ternary operator
         cell.accessoryType = item.done == true ? .checkmark : .none
+        saveItems()
         
 //
 //        if item.done == true{
@@ -96,7 +94,9 @@ class TodoListViewController: UITableViewController {
             let newItem = Item()
             newItem.title = textField.text!
             self.itemArray.append(newItem)
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            
+            self.saveItems()
+
             //Once we append the new item to our array, we need to reload the entire table view to update the UI
             self.tableView.reloadData()
         }
@@ -113,6 +113,39 @@ class TodoListViewController: UITableViewController {
         
         //Present the UI Alert we created to the user
         present(alert, animated: true, completion: nil)
+    }
+    
+    //MARK: Save Data Methods
+    
+    func saveItems(){
+        
+        //Create a pList encoder
+        let encoder = PropertyListEncoder()
+        
+        //Encode our data. We need to include try statements because it can throw an error
+        do {
+            //Encode the itemArray as a pList
+            let data = try encoder.encode(self.itemArray)
+            //Writ the pList to the filepath
+            try data.write(to: self.dataFilePath!)
+        } catch {
+            print ("Error encoding item Array: \(error)")
+        }
+        
+    }
+    
+    func loadItems(){
+        //If there is a file at this filepath
+        if let data = try? Data(contentsOf: dataFilePath!){
+            //Initialize a Decoder
+            let decoder = PropertyListDecoder()
+            do {
+                //Decode the PList as an array of items from our filepath
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding: \(error)")
+            }
+        }
     }
     
 }
