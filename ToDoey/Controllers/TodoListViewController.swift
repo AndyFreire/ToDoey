@@ -7,18 +7,23 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
             
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+//    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    
+    //Grab the persistent container viewcontext from the instance of our App Delegate at runtime
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
 
     override func viewDidLoad() {
         
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
         
         
         //If there is an array with the name "TodoListArray" in our user defaults, set the itemArray equal to it
@@ -48,6 +53,11 @@ class TodoListViewController: UITableViewController {
         
         //set the checkmark on if status of the object is "done" using ternary operator
         cell.accessoryType = item.done == true ? .checkmark : .none
+        
+        //Delete from the context and save
+//        context.delete(itemArray[indexPath.row])
+//        itemArray.remove(at: indexPath.row)
+        
         saveItems()
         
 //
@@ -71,6 +81,8 @@ class TodoListViewController: UITableViewController {
         //if our item.done is true, make it false and vice versa
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
+        saveItems()
+        
         //Reload the table to see the status update
         tableView.reloadData()
         
@@ -91,8 +103,11 @@ class TodoListViewController: UITableViewController {
         //Creation an option/action for the above alert window
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //What will happen once the user clicks Add Item on the UI Alert
-            let newItem = Item()
+            
+            //Create a new item from the above context
+            let newItem = Item(context: self.context)
             newItem.title = textField.text!
+            newItem.done = false;
             self.itemArray.append(newItem)
             
             self.saveItems()
@@ -118,35 +133,69 @@ class TodoListViewController: UITableViewController {
     //MARK: Save Data Methods
     
     func saveItems(){
-        
-        //Create a pList encoder
-        let encoder = PropertyListEncoder()
-        
-        //Encode our data. We need to include try statements because it can throw an error
+        //Save our data from the context to our data model
         do {
-            //Encode the itemArray as a pList
-            let data = try encoder.encode(self.itemArray)
-            //Writ the pList to the filepath
-            try data.write(to: self.dataFilePath!)
+            try context.save()
         } catch {
-            print ("Error encoding item Array: \(error)")
+            print ("Error saving context: \(error)")
         }
         
     }
     
-    func loadItems(){
-        //If there is a file at this filepath
-        if let data = try? Data(contentsOf: dataFilePath!){
-            //Initialize a Decoder
-            let decoder = PropertyListDecoder()
-            do {
-                //Decode the PList as an array of items from our filepath
-                itemArray = try decoder.decode([Item].self, from: data)
-            } catch {
-                print("Error decoding: \(error)")
-            }
+    func loadItems(request : NSFetchRequest<Item> = Item.fetchRequest()){
+        
+        //Initialize a fetch request and let Xcode know the type of object/data type you are requesting and the entity you are requesting from
+//        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        //Fetch the request inside a do catch block to accommodate for errors
+        do{
+            itemArray = try context.fetch(request)
+        } catch {
+            print("Error fetching data: \(error)")
         }
+        
     }
     
+}
+
+//MARK: Search Bar functionality
+
+extension TodoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        //tell Xcode what type of request we are fetching and from which Entity
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        //Create a predicate with the arguments of our request
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        //Assign the predicate we created to our request value
+        request.predicate = predicate
+        
+        //Sort the results by title in Alphabetical order
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        
+        //Pass in any sort descriptors we want. In this case, there is only one but you can do many within the array
+        request.sortDescriptors = [sortDescriptor]
+        
+//        do {
+//            itemArray = try context.fetch(request)
+//        } catch {
+//            print("Error fetching results: \(error)")
+//        }
+        
+        tableView.reloadData()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0{
+            loadItems()
+            
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+            
+        }
+    }
 }
 
