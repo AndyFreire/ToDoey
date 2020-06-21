@@ -38,6 +38,18 @@ class CategoryViewController: UITableViewController {
     
     //MARK: Table View Delegate Methods
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "goToItems", sender: self)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destinationVC = segue.destination as! TodoListViewController
+        
+        if let indexPath = tableView.indexPathForSelectedRow{
+            destinationVC.selectedCategory = categoryArray[indexPath.row]
+        }
+    }
+    
     
     
     //MARK: Data Manipulation Methods
@@ -84,6 +96,7 @@ class CategoryViewController: UITableViewController {
             //Create a new item from the above context
             let newCategory = Category(context: self.context)
             newCategory.name = textField.text!
+            
             self.categoryArray.append(newCategory)
             
             self.saveCategories()

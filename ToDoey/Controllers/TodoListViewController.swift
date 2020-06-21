@@ -12,6 +12,12 @@ import CoreData
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
+    
+    var selectedCategory: Category?{
+        didSet{
+            loadItems()
+        }
+    }
             
 //    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
@@ -107,7 +113,8 @@ class TodoListViewController: UITableViewController {
             //Create a new item from the above context
             let newItem = Item(context: self.context)
             newItem.title = textField.text!
-            newItem.done = false;
+            newItem.done = false
+            newItem.parentCategory = self.selectedCategory
             self.itemArray.append(newItem)
             
             self.saveItems()
@@ -142,10 +149,15 @@ class TodoListViewController: UITableViewController {
         
     }
     
-    func loadItems(request : NSFetchRequest<Item> = Item.fetchRequest()){
+    func loadItems(with request : NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil){
         
-        //Initialize a fetch request and let Xcode know the type of object/data type you are requesting and the entity you are requesting from
-//        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        
+        if let additionalPredicate = predicate{
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        } else {
+            request.predicate = categoryPredicate
+        }
         
         //Fetch the request inside a do catch block to accommodate for errors
         do{
@@ -153,6 +165,8 @@ class TodoListViewController: UITableViewController {
         } catch {
             print("Error fetching data: \(error)")
         }
+        
+        tableView.reloadData()
         
     }
     
@@ -178,13 +192,7 @@ extension TodoListViewController: UISearchBarDelegate {
         //Pass in any sort descriptors we want. In this case, there is only one but you can do many within the array
         request.sortDescriptors = [sortDescriptor]
         
-//        do {
-//            itemArray = try context.fetch(request)
-//        } catch {
-//            print("Error fetching results: \(error)")
-//        }
-        
-        tableView.reloadData()
+        loadItems(with: request, predicate: predicate)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
