@@ -16,6 +16,7 @@
 		C372884B2492EEEE00F08349 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C372884A2492EEEE00F08349 /* Assets.xcassets */; };
 		C372884E2492EEEE00F08349 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C372884C2492EEEE00F08349 /* LaunchScreen.storyboard */; };
 		C37655D8249E8BD90050DDAC /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37655D7249E8BD90050DDAC /* CategoryViewController.swift */; };
+		C3F7B40024A8F7810078903C /* SwipeTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F7B3FF24A8F7810078903C /* SwipeTableViewController.swift */; };
 		EBDAD86B8F3A0BACA06FFEBC /* Pods_ToDoey.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB63AEF380ED7F90CE725121 /* Pods_ToDoey.framework */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +34,7 @@
 		C372884D2492EEEE00F08349 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C372884F2492EEEE00F08349 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C37655D7249E8BD90050DDAC /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
+		C3F7B3FF24A8F7810078903C /* SwipeTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTableViewController.swift; sourceTree = "<group>"; };
 		DB63AEF380ED7F90CE725121 /* Pods_ToDoey.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ToDoey.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -110,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				C37655D7249E8BD90050DDAC /* CategoryViewController.swift */,
+				C3F7B3FF24A8F7810078903C /* SwipeTableViewController.swift */,
 				C37288452492EEEB00F08349 /* TodoListViewController.swift */,
 			);
 			path = Controllers;
@@ -250,6 +253,7 @@
 				C37655D8249E8BD90050DDAC /* CategoryViewController.swift in Sources */,
 				C37288462492EEEB00F08349 /* TodoListViewController.swift in Sources */,
 				C37288422492EEEB00F08349 /* AppDelegate.swift in Sources */,
+				C3F7B40024A8F7810078903C /* SwipeTableViewController.swift in Sources */,
 				C3614D1A249FC547005ED2F4 /* Item.swift in Sources */,
 				C37288442492EEEB00F08349 /* SceneDelegate.swift in Sources */,
 				C3614D1C249FC54F005ED2F4 /* Category.swift in Sources */,

@@ -8,8 +8,9 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     
     var toDoItems : Results<Item>?
     let realm = try! Realm()
@@ -25,6 +26,10 @@ class TodoListViewController: UITableViewController {
         
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        loadItems()
+        
+        //Set the height of our cells to 80px
+        tableView.rowHeight = 80
     }
     
     //MARK: - TableView Data Source Methods
@@ -36,8 +41,7 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         //Make sure we reuse cells as we scroll
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)        
         
         if let item = toDoItems?[indexPath.row]{
             //set the text of the cell equal to the Index path row number equivalent to our item array
@@ -84,7 +88,7 @@ class TodoListViewController: UITableViewController {
         //Create a UI Alert window
         let alert = UIAlertController(title: "Add New ToDoey Item", message: "", preferredStyle: .alert)
         
-        //Creation an option/action for the above alert window
+        //Create an option/action for the above alert window
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             
             if let currentCategory = self.selectedCategory {
@@ -123,6 +127,7 @@ class TodoListViewController: UITableViewController {
     func loadItems(){
         
         toDoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        tableView.reloadData()
         
 
 //        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
@@ -142,6 +147,19 @@ class TodoListViewController: UITableViewController {
 //
 //        tableView.reloadData()
         
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+         if let itemToDelete = self.toDoItems?[indexPath.row]{
+             do {
+                 try self.realm.write{
+                     self.realm.delete(itemToDelete)
+                 }
+             } catch {
+                 print ("Error deleting category!: \(error)")
+             }
+
+         }
     }
     
 }
